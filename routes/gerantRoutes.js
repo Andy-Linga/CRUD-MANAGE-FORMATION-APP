@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Gerant = require('../models/gerant');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const passport = require('passport');
 
 // Inscription d'un utilisateur
