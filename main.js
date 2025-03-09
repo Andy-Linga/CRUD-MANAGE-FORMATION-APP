@@ -7,6 +7,8 @@ const gerantRoutes = require('./routes/gerantRoutes');
 const session = require('express-session');
 const path = require('path');
 const flash = require('connect-flash');
+const MongoStore = require('connect-mongo');
+
 
 const app = express();
 dotenv.config();
@@ -14,15 +16,16 @@ dotenv.config();
 const PORT = process.env.PORT || 7000;
 const MONGOURL = process.env.MONGO_URL;
 
-// Connection to the database
+// Connexion à la base de données
 mongoose.connect(MONGOURL)
   .then(() => {
     console.log("Connected to the database!");
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-    });
   })
   .catch((error) => console.log(error));
+
+// Exporter l'application pour Vercel
+module.exports = app;
+
 
 // Middlewares
 app.use(express.urlencoded({ extended: false }));
@@ -34,8 +37,12 @@ app.use(session({
   secret: 'your secret key',
   resave: false,
   saveUninitialized: true,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URL, // Utilise la même URL que ta base de données
+    collectionName: 'sessions'
+  }),
+  cookie: { maxAge: 1000 * 60 * 60 * 24 } // Expire après 1 jour
 }));
-
 //passport
 app.use(passport.initialize());
 app.use(passport.session());
@@ -73,3 +80,7 @@ app.use("", gerantRoutes); // Utiliser les routes d'authentification sans préfi
 
 // CSS
 app.use(express.static('public'));
+
+
+// Exporter l'application pour Vercel
+module.exports = app;
